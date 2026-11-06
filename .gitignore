@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+.env
+.env.*
+!.env.example
+coverage/
+uploads/
+.vercel/
+.DS_Store
+**/.agents/
+**/.claude/
+**/.windsurf/
+backend/skills-lock.json

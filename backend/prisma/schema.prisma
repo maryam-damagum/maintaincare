@@ -1,0 +1,110 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  STUDENT
+  STAFF
+  MAINTENANCE_OFFICER
+  ADMIN
+}
+
+enum RequestStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  REJECTED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model User {
+  id           String   @id @default(uuid())
+  fullName     String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(STUDENT)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  requests        ServiceRequest[] @relation("RequestSubmitter")
+  assignments     Assignment[]     @relation("OfficerAssignments")
+  assignmentsMade Assignment[]     @relation("AssignedBy")
+  statusUpdates   StatusUpdate[]   @relation("StatusUpdater")
+}
+
+model RequestCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+
+  requests ServiceRequest[]
+}
+
+model ServiceRequest {
+  id            String        @id @default(uuid())
+  title         String
+  description   String
+  location      String
+  priority      Priority      @default(MEDIUM)
+  currentStatus RequestStatus @default(SUBMITTED)
+  submittedAt   DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  submittedById String
+  categoryId    String
+
+  submittedBy  User            @relation("RequestSubmitter", fields: [submittedById], references: [id])
+  category     RequestCategory @relation(fields: [categoryId], references: [id])
+  assignments  Assignment[]
+  statusUpdates StatusUpdate[]
+
+  @@index([submittedById])
+  @@index([categoryId])
+  @@index([currentStatus])
+  @@index([submittedAt])
+}
+
+model Assignment {
+  id           String   @id @default(uuid())
+  requestId    String
+  assignedToId String
+  assignedById String
+  assignedAt   DateTime @default(now())
+  notes        String?
+
+  request    ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  assignedTo User           @relation("OfficerAssignments", fields: [assignedToId], references: [id])
+  assignedBy User           @relation("AssignedBy", fields: [assignedById], references: [id])
+
+  @@index([requestId])
+  @@index([assignedToId])
+}
+
+model StatusUpdate {
+  id             String        @id @default(uuid())
+  requestId      String
+  changedById    String
+  previousStatus RequestStatus?
+  newStatus      RequestStatus
+  note           String?
+  createdAt      DateTime      @default(now())
+
+  request   ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  changedBy User           @relation("StatusUpdater", fields: [changedById], references: [id])
+
+  @@index([requestId, createdAt])
+}
