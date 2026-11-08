@@ -640,7 +640,14 @@ async function handleLogout() {
           <div className="mx-auto max-w-7xl space-y-8 p-5 sm:p-8">
             <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
               <div>
-                <p className="text-sm text-slate-500">Tuesday, 27 October 2026</p>
+                <p className="text-sm text-slate-500">
+                  {new Date().toLocaleDateString("en-GB", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
                 <h3 className="mt-1 text-2xl font-bold text-slate-900">
                   Welcome back!
                 </h3>
