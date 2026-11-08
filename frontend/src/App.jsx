@@ -1,6 +1,6 @@
 import Login from "./pages/Login";
 import { useState, useEffect } from "react";
-const API_URL = import.meta.env.VITE_API_URL || "${API_URL}";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const statusStyles = {
   "In Progress": "bg-blue-50 text-blue-700",
@@ -67,7 +67,7 @@ useEffect(() => {
   async function fetchOfficers() {
     try {
       const response = await fetch(
-        "${API_URL}/api/requests/officers",
+        `${API_URL}/api/requests/officers`,
         { credentials: "include" }
       );
 
@@ -95,10 +95,10 @@ useEffect(() => {
 
     try {
       const response = await fetch(
-        "${API_URL}/api/requests/assigned",
+        `${API_URL}/api/requests/assigned`,
         {
           credentials: "include",
-        }
+            }
       );
 
       const data = await response.json();
@@ -119,12 +119,15 @@ useEffect(() => {
 }, [user]);
 
 useEffect(() => {
-  if (!user) return;
+  if (!user) {
+    setCategories([]);
+    return;
+  }
 
   async function fetchCategories() {
     try {
       const response = await fetch(
-        "${API_URL}/api/requests/categories",
+        `${API_URL}/api/requests/categories`,
         { credentials: "include" }
       );
 
@@ -143,32 +146,31 @@ useEffect(() => {
   fetchCategories();
 }, [user]);
 
-
-  useEffect(() => {
+useEffect(() => {
   async function checkSession() {
-    try {
-      const response = await fetch(
-        "${API_URL}/api/auth/me",
-        {
-          credentials: "include",
+     try {
+          const response = await fetch(
+            `${API_URL}/api/auth/me`,
+            {
+              credentials: "include",
+            }
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            setUser(data.user);
+            console.log("Logged-in user:", data.user);
+            console.log("User role:", data.user?.role);
+          }
+        } catch (error) {
+          console.error("Session check failed:", error);
+        } finally {
+          setCheckingSession(false);
         }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-        console.log("Logged-in user:", data.user);
-        console.log("User role:", data.user?.role);
       }
-    } catch (error) {
-      console.error("Session check failed:", error);
-    } finally {
-      setCheckingSession(false);
-    }
-  }
 
-  checkSession();
-}, []);
+      checkSession();
+    }, []);
 
 
 useEffect(() => {
@@ -255,7 +257,7 @@ async function handleSubmitRequest(event) {
 
   try {
     const response = await fetch(
-      "${API_URL}/api/requests",
+      `${API_URL}/api/requests`,
       {
         method: "POST",
         headers: {
@@ -284,7 +286,7 @@ async function handleSubmitRequest(event) {
 
     // Refresh requests from the database
     const requestsResponse = await fetch(
-      "${API_URL}/api/requests",
+      `${API_URL}/api/requests`,
       { credentials: "include" }
     );
 
@@ -296,7 +298,7 @@ async function handleSubmitRequest(event) {
           id: request.id,
           title: request.title,
           location: request.location,
-          category: request.category?.name || "Uncategorized",
+           category: request.category?.name || "Uncategorized",
           priority: formatLabel(request.priority),
           status: formatLabel(request.currentStatus),
           date: new Date(request.submittedAt).toLocaleDateString(
@@ -346,7 +348,7 @@ async function handleAssignOfficer(requestId, officerId) {
     const response = await fetch(
       `${API_URL}/api/requests/${requestId}/assign`,
       {
-        method: "POST",
+         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -366,7 +368,7 @@ async function handleAssignOfficer(requestId, officerId) {
     setAssignmentMessage("Maintenance request assigned successfully.");
 
     const requestsResponse = await fetch(
-      "${API_URL}/api/requests",
+      `${API_URL}/api/requests`,
       { credentials: "include" }
     );
 
@@ -396,8 +398,8 @@ const handleOfficerStatusUpdate = async (requestId, status) => {
   const note = document
     .getElementById(`note-${requestId}`)
     ?.value.trim();
-
-  if (!note || note.length < 3) {
+    
+    if (!note || note.length < 3) {
     setOfficerMessage("Please enter a progress note (at least 3 characters).");
     return;
   }
@@ -427,7 +429,7 @@ const handleOfficerStatusUpdate = async (requestId, status) => {
     setOfficerMessage(data.message);
 
     const refreshResponse = await fetch(
-      "${API_URL}/api/requests/assigned",
+      `${API_URL}/api/requests/assigned`,
       {
         credentials: "include",
       }
@@ -446,7 +448,7 @@ const handleOfficerStatusUpdate = async (requestId, status) => {
     setOfficerMessage(error.message);
   } finally {
     setUpdatingRequestId("");
-  }
+     }
 };
 
 
@@ -498,7 +500,7 @@ const fetchRequestHistory = async (requestId) => {
 async function handleLogout() {
   try {
     const response = await fetch(
-      "${API_URL}/api/auth/logout",
+      `${API_URL}/api/auth/logout`,
       {
         method: "POST",
         credentials: "include",
@@ -546,7 +548,7 @@ async function handleLogout() {
           </p>
 
           <nav className="space-y-2">
-            <a
+             <a
               href="#dashboard"
               className="flex items-center gap-3 rounded-xl bg-blue-50 px-4 py-3 font-medium text-blue-700"
             >
@@ -596,7 +598,7 @@ async function handleLogout() {
                   <p className="font-semibold text-slate-800">Administration</p>
                   <p className="mt-1 text-sm text-slate-500">
                     Review requests and assign maintenance officers.
-                  </p>
+                     </p>
                 </>
               ) : (
                 <>
@@ -646,7 +648,7 @@ async function handleLogout() {
                   Here's an overview of your maintenance activity.
                 </p>
               </div>
-
+              
               <a
                 id="new-request"
                 href="#request-form"
@@ -696,8 +698,8 @@ async function handleLogout() {
         View and manage maintenance tasks assigned to you.
       </p>
     </div>
-
-        {officerRequestsLoading ? (
+      
+      {officerRequestsLoading ? (
           <p className="text-gray-500">Loading assigned requests...</p>
         ) : officerRequestsError ? (
           <p className="text-red-600">{officerRequestsError}</p>
@@ -746,7 +748,7 @@ async function handleLogout() {
                     Progress Note
                   </label>
 
-                  <textarea
+                    <textarea
                     id={`note-${request.id}`}
                     rows="3"
                     placeholder="Describe the work completed or progress made..."
@@ -796,7 +798,7 @@ async function handleLogout() {
             </div>
 
             ))}
-          </div>
+             </div>
         )}
       </section>
     )}
@@ -846,7 +848,7 @@ async function handleLogout() {
                       <option value="">All priorities</option>
                       <option value="LOW">Low</option>
                       <option value="MEDIUM">Medium</option>
-                      <option value="HIGH">High</option>
+                       <option value="HIGH">High</option>
                       <option value="URGENT">Urgent</option>
                     </select>
 
@@ -896,7 +898,7 @@ async function handleLogout() {
                       : "bg-red-50 text-red-700"
                   }`}
                 >
-                  {assignmentMessage}
+                     {assignmentMessage}
                 </div>
               )}
 
@@ -947,8 +949,8 @@ async function handleLogout() {
                             <p className="mt-1 text-xs text-slate-500">
                               {request.id} · {request.location}
                             </p>
-                            
-                          <button
+
+                             <button
                             type="button"
                             onClick={() => fetchRequestHistory(request.id)}
                             className="mt-3 text-sm font-medium text-blue-700 hover:text-blue-900"
@@ -996,7 +998,7 @@ async function handleLogout() {
                             </div>
                           )}
 
-                          </td>
+                            </td>
 
                           <td className="px-6 py-4 text-slate-600">
                             {request.category}
@@ -1046,7 +1048,7 @@ async function handleLogout() {
                               }}
                               className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-medium text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                              {assigningRequestId === request.id ? "Assigning..." : "Assign"}
+                               {assigningRequestId === request.id ? "Assigning..." : "Assign"}
                             </button>
                           </div>
                         </td>
@@ -1096,7 +1098,7 @@ async function handleLogout() {
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm font-medium">
+                   <label className="mb-2 block text-sm font-medium">
                     Location
                   </label>
                   <input
@@ -1146,7 +1148,7 @@ async function handleLogout() {
                 <div className="md:col-span-2">
                   <label className="mb-2 block text-sm font-medium">
                     Description
-                  </label>
+                     </label>
                   <textarea
                     value={formData.description}
                     onChange={(event) =>
@@ -1196,7 +1198,7 @@ function formatLabel(value) {
   if (!value) return "Unknown";
 
   return value
-    .toLowerCase()
+   .toLowerCase()
     .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
