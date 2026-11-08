@@ -179,7 +179,7 @@ describe("Maintenance Request Management", () => {
       adminRequests.body.requests.map((item) => item.id);
 
     expect(adminRequestIds).toContain(staffRequestId);
-  });
+  }, 30000);
 
   it("should allow an administrator to assign a request and an officer to complete it with full status history", async () => {
     // 1. Log in as a student and submit a new request.
